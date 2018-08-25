@@ -1,0 +1,33 @@
+[*]
+[*] GTKWave Analyzer v3.3.48 (w)1999-2013 BSI
+[*] Mon Apr 24 12:03:36 2017
+[*]
+[dumpfile] "/Users/dmainz/Documents/Development/FPGA/vga.vcd"
+[dumpfile_mtime] "Mon Apr 24 11:58:01 2017"
+[dumpfile_size] 24173982
+[savefile] "/Users/dmainz/Documents/Development/FPGA/waves.gtkw"
+[timestart] 1965700
+[size] 1682 814
+[pos] -1 -1
+*-14.309341 1992300 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] test_vga_driver.
+[sst_width] 203
+[signals_width] 208
+[sst_expanded] 1
+[sst_vpaned_height] 233
+@28
+test_vga_driver.vga0.clk
+test_vga_driver.vga0.color[2:0]
+test_vga_driver.vga0.halfclk
+@24
+test_vga_driver.vga0.hcounter[9:0]
+@28
+test_vga_driver.vga0.hdisp
+test_vga_driver.vga0.hsync
+@25
+test_vga_driver.vga0.vcounter[9:0]
+@28
+test_vga_driver.vga0.vdisp
+test_vga_driver.vga0.vsync
+[pattern_trace] 1
+[pattern_trace] 0
