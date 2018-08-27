@@ -22,7 +22,7 @@ module pic24programmer #(parameter DATAWIDTH=32, MEMSIZElog2=7)
    wire 		 dvalid;
    
    pic24progmem   imem(.clk(clk), .rstn(rstn), .addr(addr), .ce(ce), .we(we), .din(data_in_reg), .dout(instr));
-   pic24flashprog prog(.clk(clk), .rstn(rstn), 
+   pic24flashprog pic24prog(.clk(clk), .rstn(rstn), 
 		       .PGCx(PGCx), 
 		       .PGDx_in(PGDx_in),
 		       .PGDx_out(PGDx_out),
@@ -41,10 +41,12 @@ module pic24programmer #(parameter DATAWIDTH=32, MEMSIZElog2=7)
          addr <= { MEMSIZElog2 {1'b0}};
          ce <= 1'b0;
          we <= 1'b0;
+	 valid <= 1'b0;
       end
       else begin
 	 ce <= 1'b1;
-	 valid <= 1'b1;
+	 if(addr < MAX_ADDR) valid <= 1'b1;
+	 else valid <= 1'b0;
 	 if(ready == 1'b1 && addr < MAX_ADDR) begin
 	    addr <= addr + 1;
 	 end
@@ -74,6 +76,7 @@ module pic24programmer #(parameter DATAWIDTH=32, MEMSIZElog2=7)
       imem.mem[17]={7'h00,1'b0,24'h000000};  // NOP
       imem.mem[18]={7'h00,1'b0,24'h040200};  // GOTO 0x200
       imem.mem[19]={7'h00,1'b0,24'h000000};  // NOP
+      imem.mem[20]={7'h00,1'b0,24'h000000};  // NOP
    end
    
 endmodule // pic24programmer

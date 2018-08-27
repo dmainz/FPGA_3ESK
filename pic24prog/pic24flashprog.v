@@ -67,9 +67,9 @@ REGOUT Instruction
    localparam ICSP_SM_RESET_DONE   = 'd4;
    localparam ICSP_SM_IDLE         = 'd5;
    localparam ICSP_SM_WR_CMD       = 'd6;
-   localparam ICSP_SM_WR_INSTR     = 'd5;
-   localparam ICSP_SM_RD_CMD       = 'd6;
-   localparam ICSP_SM_RD_DOUT      = 'd7;
+   localparam ICSP_SM_WR_INSTR     = 'd7;
+   localparam ICSP_SM_RD_CMD       = 'd8;
+   localparam ICSP_SM_RD_DOUT      = 'd9;
    localparam P4 = 2; // clocks
    localparam P5 = 1; // clocks
    localparam P6 = 6; // clocks
@@ -195,19 +195,19 @@ REGOUT Instruction
 	   cntr_rst = 1'b0;
 	   if(counter == P19) begin
 	      MCLRn_reg = 1'b1;
-	      cntr_rst = 1'b1;
 	   end
-	   else if(counter > P7) begin
+	   else if(counter > P19+P7) begin
 	      toggle <= 1'b1;
-	      if(counter == P7+2 +18) begin // 9 data low clocks
-	      cntr_rst = 1'b1;
+	      if(counter == P19+P7+18) begin // 9 data low clocks
+		 cntr_rst = 1'b1;
+		 toggle <= 1'b0;
 		 SM_ICSP_next = ICSP_SM_IDLE;
 	      end
 	   end
 	end
 	ICSP_SM_IDLE: begin
 	   dvalid_reg = 1'b0;
-	   PGDx_dir_reg = 1'b1;
+	   PGDx_dir_reg = 1'b0;
 	   ready_reg = 1'b1;
 	   if(valid == 1'b1) begin
 	      instruction = instr;
@@ -245,49 +245,48 @@ REGOUT Instruction
 	end
 	ICSP_SM_WR_INSTR: begin
 	   cntr_rst = 1'b0;
-	   PGDx_dir_reg = 1'b1;
-	   if(counter < 'd47) toggle <= 1'b1;
+	   if(counter < 'd48) toggle <= 1'b1;
 	   if(PGCx_reg == 1'b1) begin
 	      instruction <= {instruction[22:0],1'b0};
 	   end
-	   if(counter < 'd47) PGDx_out_reg <= instruction[23];
-	   if(counter == 'd47) begin
+	   if(counter < 'd48) PGDx_out_reg <= instruction[23];
+	   if(counter == 'd49) begin
 	      toggle <= 1'b0;
-	      PGDx_out_reg = 1'b0;
-	      cntr_rst = 1'b1;
-	      SM_ICSP_next = ICSP_SM_IDLE;
+	      PGDx_out_reg <= 1'b0;
+	      cntr_rst <= 1'b1;
+	      SM_ICSP_next <= ICSP_SM_IDLE;
 	   end
 	end
 	ICSP_SM_RD_CMD: begin
 	   cntr_rst = 1'b0;
 	   ready_reg = 1'b0;
-	   if(counter < 'd7) toggle <= 1'b1;
+	   if(counter < 'd8) toggle <= 1'b1;
 	   if(PGCx_reg == 1'b1) begin
 	      command <= {command[2:0],1'b0};
 	   end
-	   if(counter < 'd7) PGDx_out_reg <= command[3];
-	   if(counter == 'd7) begin
+	   if(counter < 'd8) PGDx_out_reg <= command[3];
+	   if(counter == 'd9) begin
 	      toggle <= 1'b0;
 	      PGDx_out_reg = 1'b0;
 	   end
-	   if(counter > 'd7) begin
-	      if(counter>'d9) toggle <= 1'b1;
-	      if(counter=='d41) begin
+	   if(counter > 'd9) begin
+	      if(counter>'d11) toggle <= 1'b1;
+	      if(counter=='d42) begin
 		 toggle <= 1'b0;
 		 PGDx_out_reg = 1'b0;
 		 cntr_rst = 1'b1;
-		 SM_ICSP_next = ICSP_SM_IDLE;
+		 SM_ICSP_next = ICSP_SM_RD_DOUT;
 	      end
 	   end
 	end
 	ICSP_SM_RD_DOUT: begin
 	   cntr_rst = 1'b0;
-	   PGDx_dir_reg = 1'b0;
-	   if(counter < 31) toggle <= 1'b1;
+	   PGDx_dir_reg = 1'b1;
+	   if(counter < 32) toggle <= 1'b1;
 	   if(PGCx_reg == 1'b1) begin
 	      regout = {regout[14:0],PGDx_in};
 	   end
-	   if(counter == 'd31) begin
+	   if(counter == 'd33) begin
 	      dvalid_reg = 1'b1;
 	      toggle <= 1'b0;
 	      cntr_rst = 1'b1;
