@@ -215,7 +215,7 @@ REGOUT Instruction
 	   dvalid_reg = 1'b0;
 	   PGDx_dir_reg = 1'b0;
 `ifdef DEBUG
-	   $display("%t, SM_ICSP=%0x counter=%0x valid=%0x",$time,SM_ICSP,counter,valid);
+	   $display("%t, SM_ICSP=%0x counter=%0x valid=%0x",$time,counter,valid);
 `endif
 	   if(valid == 1'b1) begin
 `ifdef DEBUG
@@ -227,18 +227,27 @@ REGOUT Instruction
 `endif
 	      if(cmd == 1'b0) begin
 		 command = ICSP_SIX;
-		 if(out_of_reset)
-		   SM_ICSP_next = ICSP_SM_WR_INSTR;
-		 else
-		   SM_ICSP_next = ICSP_SM_WR_CMD;
+		 if(out_of_reset) begin
+		    SM_ICSP_next = ICSP_SM_WR_INSTR;
+		    cntr_rst <= 1'b1;
+		 end
+		 else begin
+		    SM_ICSP_next = ICSP_SM_WR_CMD;
+		    cntr_rst <= 1'b1;
+		 end
 	      end
 	      else if(cmd == 1'b1) begin
 		 command = ICSP_REGOUT;
+		 cntr_rst <= 1'b1;
 		 SM_ICSP_next = ICSP_SM_RD_CMD;
 	      end
 	   end
-	   else
-	     SM_ICSP_next = ICSP_SM_IDLE;
+	   else begin
+	      SM_ICSP_next = ICSP_SM_IDLE;
+	      cntr_rst <= 1'b0;
+	      if(counter == 2000) // If no valids for 2000 clks, exit ICSP mode
+		MCLRn_reg <= 1'b0;
+	   end
 	   out_of_reset = 1'b0;
 //	   cntr_rst <= 1'b1;
 	end
