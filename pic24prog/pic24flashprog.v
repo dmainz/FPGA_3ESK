@@ -153,6 +153,10 @@ REGOUT Instruction
 	PGCx_reg <= ~PGCx_reg;
    end
    
+`ifdef DEBUG
+   always @(instr) $display("%t, INSTR = %0x",$time,instr);
+`endif
+   
    always @(SM_ICSP or counter or valid) begin
       case (SM_ICSP)
 	ICSP_SM_RESET_IDLE: begin
@@ -202,35 +206,44 @@ REGOUT Instruction
 		 cntr_rst <= 1'b1;
 		 toggle <= 1'b0;
 		 SM_ICSP_next <= ICSP_SM_IDLE;
+		 ready_reg <= 1'b1;
 	      end
 	   end
 	end
 	ICSP_SM_IDLE: begin
-	   dvalid_reg <= 1'b0;
-	   PGDx_dir_reg <= 1'b0;
-	   ready_reg <= 1'b1;
+	   ready_reg = 1'b0;
+	   dvalid_reg = 1'b0;
+	   PGDx_dir_reg = 1'b0;
+`ifdef DEBUG
+	   $display("%t, SM_ICSP=%0x counter=%0x valid=%0x",$time,SM_ICSP,counter,valid);
+`endif
 	   if(valid == 1'b1) begin
-	      instruction <= instr;
+`ifdef DEBUG
+	   $display("%t, valid=%0x,instr=%0x",$time,valid,instr);
+`endif
+	      instruction = instr;
+`ifdef DEBUG
+	   $display("%t, valid=%0x,instruction=%0x",$time,valid,instruction);
+`endif
 	      if(cmd == 1'b0) begin
-		 command <= ICSP_SIX;
+		 command = ICSP_SIX;
 		 if(out_of_reset)
-		   SM_ICSP_next <= ICSP_SM_WR_INSTR;
+		   SM_ICSP_next = ICSP_SM_WR_INSTR;
 		 else
-		   SM_ICSP_next <= ICSP_SM_WR_CMD;
+		   SM_ICSP_next = ICSP_SM_WR_CMD;
 	      end
 	      else if(cmd == 1'b1) begin
-		 command <= ICSP_REGOUT;
-		 SM_ICSP_next <= ICSP_SM_RD_CMD;
+		 command = ICSP_REGOUT;
+		 SM_ICSP_next = ICSP_SM_RD_CMD;
 	      end
 	   end
 	   else
-	     SM_ICSP_next <= ICSP_SM_IDLE;
-	   out_of_reset <= 1'b0;
-	   cntr_rst <= 1'b1;
+	     SM_ICSP_next = ICSP_SM_IDLE;
+	   out_of_reset = 1'b0;
+//	   cntr_rst <= 1'b1;
 	end
 	ICSP_SM_WR_CMD: begin
 	   cntr_rst <= 1'b0;
-	   ready_reg <= 1'b0;
 	   toggle <= 1'b1;
 	   if(PGCx_reg == 1'b1) begin
 	      command <= {command[2:0],1'b0};
@@ -244,7 +257,6 @@ REGOUT Instruction
 	   end
 	end
 	ICSP_SM_WR_INSTR: begin
-	   ready_reg <= 1'b0;
 	   cntr_rst <= 1'b0;
 	   if(counter < 'd48) toggle <= 1'b1;
 	   if(PGCx_reg == 1'b1) begin
@@ -255,12 +267,12 @@ REGOUT Instruction
 	      toggle <= 1'b0;
 	      PGDx_out_reg <= 1'b0;
 	      cntr_rst <= 1'b1;
+	      ready_reg <= 1'b1;
 	      SM_ICSP_next <= ICSP_SM_IDLE;
 	   end
 	end
 	ICSP_SM_RD_CMD: begin
 	   cntr_rst <= 1'b0;
-	   ready_reg <= 1'b0;
 	   if(counter < 'd8) toggle <= 1'b1;
 	   if(PGCx_reg == 1'b1) begin
 	      command <= {command[2:0],1'b0};
@@ -272,7 +284,7 @@ REGOUT Instruction
 	   end
 	   if(counter > 'd9) begin
 	      if(counter>'d11) toggle <= 1'b1;
-	      if(counter=='d42) begin
+	      if(counter=='d28) begin
 		 toggle <= 1'b0;
 		 PGDx_out_reg <= 1'b0;
 		 cntr_rst <= 1'b1;
@@ -291,6 +303,7 @@ REGOUT Instruction
 	      dvalid_reg <= 1'b1;
 	      toggle <= 1'b0;
 	      cntr_rst <= 1'b1;
+	      ready_reg <= 1'b1;
 	      SM_ICSP_next <= ICSP_SM_IDLE;
 	   end
         end
