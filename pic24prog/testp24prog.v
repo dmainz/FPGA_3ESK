@@ -4,7 +4,7 @@ module testp24prog;
    wire [15:0] dout;
    wire        dvalid;
    
-   pic24programmer prog(.clk(clk), .rstn(rstn), 
+   pic24programmer prog(.clk50MHz(clk), .rstn(rstn), 
 		       .PGCx(PGCx), 
 		       .PGDx_in(PGDx_in),
 		       .PGDx_out(PGDx_out),

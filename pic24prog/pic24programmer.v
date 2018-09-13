@@ -1,6 +1,6 @@
 
 module pic24programmer #(parameter DATAWIDTH=32, MEMSIZElog2=7) 
-   ( input clk, input rstn,
+   ( input clk50MHz, input rstn,
      output 	   PGCx, 
      input 	   PGDx_in,
      output 	   PGDx_out,
@@ -25,7 +25,14 @@ module pic24programmer #(parameter DATAWIDTH=32, MEMSIZElog2=7)
    wire [15:0] 		 muxinstr;
    wire [23:0] 		 instr_in;
    reg 			 dmemvalid;
-   
+   wire                  clk;
+
+`ifndef SIM
+   `include "clock_divider.vh"
+`else
+   assign clk = clk50MHz;
+`endif
+
    pic24progmem   imem(.clk(clk), .rstn(rstn), .addr(addr), .ce(ce), .we(we), .din(data_in_reg), .dout(instr));
    pic24progmem   dmem(.clk(clk), .rstn(rstn), .addr(daddr), .ce(dce), .we(dwe), .din(ddata_in_reg), .dout(data));
    pic24flashprog pic24prog(.clk(clk), .rstn(rstn), 
